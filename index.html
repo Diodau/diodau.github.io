@@ -143,6 +143,18 @@
 		.stats, p {
 			text-align: left;
 		}
+	
+		.return-to-top-button {
+            position: fixed;
+            font-size: 16px;
+            bottom: 10px; /* Adjust as needed */
+            left: 10px; /* Adjust as needed */
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #cae8ca;
+            border: 2px solid #4CAF50;
+            z-index: 1;
+        }
 
     </style>
 </head>
@@ -177,6 +189,7 @@
 				<p>Used KWs: <span id="usedKeywords">0</span></p>
 				<p>% used: <span id="percentageKeywords">0%</span></p>
 				<p>Unused KWs: <span id="unusedKeywords">0</span></p>
+					<button class="return-to-top-button" onclick="returnToTop()">Return to top</button>
         </div>
         <div class="quill-container">
             <div id="editor" class="quill-editor"></div>
@@ -299,6 +312,7 @@
             });
 
             updateStats(); // Update stats after checking keywords
+			adjustResultsContainerHeight();
         }
 
         function updateStats() {
@@ -358,6 +372,33 @@
 			var howToUseButton = document.querySelector('.how-to-use-button');
 			howToUseButton.textContent = instructions.classList.contains('show') ? 'Hide Instructions' : 'How to use';
 		}
+		
+		function returnToTop() {
+			window.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			});
+		}
+		
+		 function returnToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Make the button sticky
+        window.addEventListener('scroll', function () {
+            var button = document.querySelector('.return-to-top-button');
+            var keywordContainer = document.querySelector('.keyword-container');
+            var keywordContainerRect = keywordContainer.getBoundingClientRect();
+
+            if (window.scrollY > keywordContainerRect.bottom) {
+                button.style.visibility = 'visible';
+            } else {
+                button.style.visibility = 'hidden';
+            }
+        });
 
     </script>
 </body>
