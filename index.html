@@ -70,7 +70,7 @@
             margin-right: 10px;
             position: relative;
 			overflow: auto;
-			min-height: 550px;
+			min-height: 1250px;
         }
 
         .results-container.sticky {
@@ -139,6 +139,10 @@
 			display: block;
 			text-align: left;
 		}
+		
+		.stats, p {
+			text-align: left;
+		}
 
     </style>
 </head>
@@ -168,11 +172,11 @@
             <h2>Keywords</h2>
             <textarea id="keywords"></textarea>
             <button class="check-button" onclick="checkKeywords()">Check Keywords</button>
-            <h2>Stats</h2>
-            <p>Total number of keywords: <span id="totalKeywords">0</span></p>
-            <p>Used KWs: <span id="usedKeywords">0</span></p>
-            <p>% used: <span id="percentageKeywords">0%</span></p>
-            <p>Unused KWs: <span id="unusedKeywords">0</span></p>
+            <h2 class="stats">Stats</h2>
+				<p>Total number of keywords: <span id="totalKeywords">0</span></p>
+				<p>Used KWs: <span id="usedKeywords">0</span></p>
+				<p>% used: <span id="percentageKeywords">0%</span></p>
+				<p>Unused KWs: <span id="unusedKeywords">0</span></p>
         </div>
         <div class="quill-container">
             <div id="editor" class="quill-editor"></div>
