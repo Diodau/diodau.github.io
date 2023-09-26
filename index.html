@@ -58,28 +58,8 @@
         .quill-container {
             width: 50%;
             border: 2px solid black;
-            min-height: 200px;
+            min-height: auto;
             margin-right: 10px;
-        }
-
-        .quill-toolbar {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid black;
-            background-color: #f8f8f8;
-            padding: 5px;
-        }
-
-        .quill-toolbar button {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 5px 10px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .quill-editor {
-            min-height: 200px;
         }
 
         .results-container {
@@ -151,17 +131,6 @@
             <p>Unused KWs: <span id="unusedKeywords">0</span></p>
         </div>
         <div class="quill-container">
-            <div class="quill-toolbar">
-                <button class="ql-bold"></button>
-                <button class="ql-italic"></button>
-                <button class="ql-underline"></button>
-                <button class="ql-strike"></button>
-                <button class="ql-link"></button>
-                <button class="ql-image"></button>
-                <button class="ql-video"></button>
-                <button class="ql-list" value="ordered"></button>
-                <button class="ql-list" value="bullet"></button>
-            </div>
             <div id="editor" class="quill-editor"></div>
         </div>
         <div class="results-container">
