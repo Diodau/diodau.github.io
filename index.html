@@ -197,6 +197,7 @@
         <div class="results-container" id="resultsContainer">
             <div class="results-title">
                 <h2>Keyword Results</h2>
+				<button id="clear-results-button" onclick="clearResults()">Clear Results</button>
                 <button id="sticky-button" onclick="toggleSticky()">Stick List</button>
             </div>
             <table class="results-table" id="resultsTable">
@@ -399,6 +400,24 @@
                 button.style.visibility = 'hidden';
             }
         });
+		
+		function clearResults() {
+			var results = document.getElementById('results');
+			results.innerHTML = '';
+			
+			// Clear Quill editor
+			quill.root.innerHTML = '';
+
+			// Clear keywords textarea
+			document.getElementById('keywords').value = '';
+
+			// Also update the stats after clearing results
+			updateStats();
+
+			// Adjust the height of the results container
+			adjustResultsContainerHeight();
+}
+
 
     </script>
 </body>
