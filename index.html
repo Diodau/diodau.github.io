@@ -25,7 +25,7 @@
             width: 15%;
             box-sizing: border-box;
             border: 2px solid black;
-            height: 250px;
+            height: 650px;
             padding: 10px;
             margin-right: 10px;
             display: flex;
@@ -43,6 +43,16 @@
             width: calc(100% - 20px);
             padding: 10px;
             font-size: 16px;
+        }
+
+        .stats-container {
+            width: 15%;
+            box-sizing: border-box;
+            border: 2px solid black;
+            padding: 10px;
+            margin-right: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         .quill-container {
@@ -134,6 +144,11 @@
             <h2>Keywords</h2>
             <textarea id="keywords"></textarea>
             <button class="check-button" onclick="checkKeywords()">Check Keywords</button>
+			<h2>Stats</h2>
+            <p>Total number of keywords: <span id="totalKeywords">0</span></p>
+            <p>Used KWs: <span id="usedKeywords">0</span></p>
+            <p>% used: <span id="percentageKeywords">0%</span></p>
+            <p>Unused KWs: <span id="unusedKeywords">0</span></p>
         </div>
         <div class="quill-container">
             <div class="quill-toolbar">
@@ -263,6 +278,29 @@
 
                 results.innerHTML += row;
             });
+
+            updateStats(); // Update stats after checking keywords
+        }
+
+        function updateStats() {
+            var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+            var usedKeywords = 0;
+
+            keywords.forEach(function (keyword) {
+                var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'giu');
+                if (quill.root.innerHTML.match(regex)) {
+                    usedKeywords++;
+                }
+            });
+
+            var totalKeywords = keywords.length;
+            var percentageKeywords = (usedKeywords / totalKeywords * 100).toFixed(2) + '%';
+            var unusedKeywords = totalKeywords - usedKeywords;
+
+            document.getElementById('totalKeywords').textContent = totalKeywords;
+            document.getElementById('usedKeywords').textContent = usedKeywords;
+            document.getElementById('percentageKeywords').textContent = percentageKeywords;
+            document.getElementById('unusedKeywords').textContent = unusedKeywords;
         }
 
         function escapeRegExp(string) {
