@@ -70,6 +70,7 @@
             margin-right: 10px;
             position: relative;
 			overflow: auto;
+			min-height: 550px;
         }
 
         .results-container.sticky {
@@ -115,11 +116,54 @@
         .highlight-green {
             background-color: green;
         }
+		
+		.how-to-use-container {
+			text-align: center;
+			margin-bottom: 20px;
+		}
+
+		.how-to-use-button {
+			font-size: 16px;
+			padding: 10px 20px;
+			cursor: pointer;
+		}
+
+		.instructions {
+			display: none;
+			margin-top: 10px;
+			border: 2px solid black;
+			padding: 10px;
+		}
+
+		.instructions.show {
+			display: block;
+			text-align: left;
+		}
+
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="how-to-use-container">
+    <button class="how-to-use-button" onclick="toggleInstructions()">How to use</button>
+    <div class="instructions" id="instructions">
+        <h2>How to use:</h2>
+        <ol>
+            <li>Paste the list of keywords into the "Keywords" field (1 keyword, 1 line)</li>
+            <li>Paste the text into the editor</li>
+            <li>Click on "Check Keywords"</li>
+        </ol>
+		<h2>Note:</h2>
+		<ul>
+			<li>Total Instances = exact keyword match</li>
+			<li>Partial Matches = keywords with slight modifications (eg, KW="casino", partial match="casinos")</li>
+			<li>If a keyword isn't showing up, it's possible there's some space after the last letter.</li>
+			<li>In Stats, Used KWs is the number of keywords used at least once. % used is the percentage of keywords used at least once compared to the total number.</li>
+			<li>Keyword check isn't case sensitive and works with all alphabets</li>
+		</ul>
+    </div>
+	
+	<div class="container">
         <div class="keyword-container">
             <h2>Keywords</h2>
             <textarea id="keywords"></textarea>
@@ -150,6 +194,8 @@
                 <tbody id="results"></tbody>
             </table>
         </div>
+</div>
+
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
@@ -300,6 +346,15 @@
 
             stickyEnabled = !stickyEnabled;
         }
+		
+		function toggleInstructions() {
+			var instructions = document.getElementById('instructions');
+			instructions.classList.toggle('show');
+			
+			var howToUseButton = document.querySelector('.how-to-use-button');
+			howToUseButton.textContent = instructions.classList.contains('show') ? 'Hide Instructions' : 'How to use';
+		}
+
     </script>
 </body>
 
