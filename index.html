@@ -222,6 +222,7 @@
         var totalInstancesHighlighted = false;
         var partialMatchesHighlighted = false;
         var stickyEnabled = false;
+		var currentHighlightedKeyword = null;
 
         var quill = new Quill('#editor', {
             theme: 'snow',
@@ -236,23 +237,23 @@
         });
 
         function toggleHighlight(textContainer, keyword, highlightClass) {
-            var spans = textContainer.querySelectorAll('.' + highlightClass);
-            spans.forEach(function (span) {
-                span.outerHTML = span.innerHTML;
-            });
+			var spans = textContainer.querySelectorAll('.' + highlightClass);
+			spans.forEach(function (span) {
+				span.outerHTML = span.innerHTML;
+			});
 
-            var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'giu');
-            var text = textContainer.innerHTML;
-            var highlightedText = text.replace(regex, function (match) {
-                return '<span class="' + highlightClass + '">' + match + '</span>';
-            });
+			var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'giu');
+			var text = textContainer.innerHTML;
+			var highlightedText = text.replace(regex, function (match) {
+				return '<span class="' + highlightClass + '">' + match + '</span>';
+			});
 
-            if (text === highlightedText) {
-                highlightedText = text.replace(new RegExp('<span class="' + highlightClass + '">|<\/span>', 'gi'), '');
-            }
+			if (text === highlightedText) {
+				highlightedText = text.replace(new RegExp('<span class="' + highlightClass + '">|<\/span>', 'gi'), '');
+			}
 
-            textContainer.innerHTML = highlightedText;
-        }
+			textContainer.innerHTML = highlightedText;
+		}
 
         function toggleInstancesHighlight(keyword) {
             var transcribedDiv = quill.root;
