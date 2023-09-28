@@ -206,6 +206,7 @@
                 <p>Used KWs: <span id="usedKeywords">0</span></p>
                 <p>% used: <span id="percentageKeywords">0%</span></p>
                 <p>Unused KWs: <span id="unusedKeywords">0</span></p>
+				<button id="clear-results-button" onclick="clearResults()">Clear Results</button>
                 <button class="return-to-top-button" onclick="returnToTop()">Return to top</button>
             </div>
             <div class="quill-container">
@@ -214,7 +215,6 @@
             <div class="results-container" id="resultsContainer">
                 <div class="results-title">
                     <h2>Keyword Results</h2>
-                    <button id="clear-results-button" onclick="clearResults()">Clear Results</button>
                     <button id="sticky-button" onclick="toggleSticky()">Stick List</button>
                 </div>
                 <table class="results-table" id="resultsTable">
