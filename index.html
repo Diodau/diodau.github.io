@@ -157,12 +157,17 @@
         }
 		
 		#clear-results-button {
-			background-color: #f44336;
+			background-color: #FF6865;
+		}
+		
+		#sticky-button, #clear-results-button {
+			padding: 5px;
 		}
 		
 		button {
-			background-color: #4CAF50;
+			background-color: #32CD32;
 			font-weight: 500;
+			border-radius: 12px;
 		}
 
     </style>
@@ -233,17 +238,33 @@
         var stickyEnabled = false;
 		var currentHighlightedKeyword = null;
 
-        var quill = new Quill('#editor', {
-            theme: 'snow',
-            placeholder: 'Insert your text here...',
-            modules: {
-                toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['link', 'image', 'video'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-                ]
-            }
-        });
+var quill = new Quill('#editor', {
+    theme: 'snow',
+    placeholder: 'Insert your text here...',
+    modules: {
+        toolbar: [
+            [{ 'font': [] }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+			[{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            ['link', 'image', 'video'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ]
+    }
+});
+
+var Size = Quill.import('attributors/style/size');
+Size.whitelist = ['14px', '16px', '18px', '24px']; // Define the sizes you want
+Quill.register(Size, true);
+
+var Font = Quill.import('formats/font');
+Font.whitelist = ['Arial', 'Georgia', 'Impact', 'Tahoma', 'Verdana'];
+Quill.register(Font, true);
+
+// Add custom header formats
+var Header = Quill.import('formats/header');
+Header.whitelist = [false, 1, 2, 3, 4]; // Allow header levels 1 to 4
+Quill.register(Header, true);
 
         function toggleHighlight(textContainer, keyword, highlightClass) {
 			var spans = textContainer.querySelectorAll('.' + highlightClass);
