@@ -204,8 +204,6 @@
 				<p>Used KWs: <span id="usedKeywords">0</span></p>
 				<p>% used: <span id="percentageKeywords">0%</span></p>
 				<p>Unused KWs: <span id="unusedKeywords">0</span></p>
-				<button id="download-button">Download as Word</button>
-
 					<button class="return-to-top-button" onclick="returnToTop()">Return to top</button>
         </div>
         <div class="quill-container">
@@ -234,41 +232,39 @@
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.8.2/html-docx.js"></script>
-
     <script>
         var totalInstancesHighlighted = false;
         var partialMatchesHighlighted = false;
         var stickyEnabled = false;
 		var currentHighlightedKeyword = null;
 
-var quill = new Quill('#editor', {
-    theme: 'snow',
-    placeholder: 'Insert your text here...',
-    modules: {
-        toolbar: [
-            [{ 'font': [] }],
-            [{ 'size': ['small', false, 'large', 'huge'] }],
-			[{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            ['link', 'image', 'video'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        ]
-    }
-});
+		var quill = new Quill('#editor', {
+			theme: 'snow',
+			placeholder: 'Insert your text here...',
+			modules: {
+				toolbar: [
+					[{ 'font': [] }],
+					[{ 'size': ['small', false, 'large', 'huge'] }],
+					[{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+					['bold', 'italic', 'underline', 'strike'],
+					['link', 'image', 'video'],
+					[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+				]
+			}
+		});
 
-var Size = Quill.import('attributors/style/size');
-Size.whitelist = ['14px', '16px', '18px', '24px']; // Define the sizes you want
-Quill.register(Size, true);
+		var Size = Quill.import('attributors/style/size');
+		Size.whitelist = ['14px', '16px', '18px', '24px']; // Define the sizes you want
+		Quill.register(Size, true);
 
-var Font = Quill.import('formats/font');
-Font.whitelist = ['Arial', 'Georgia', 'Impact', 'Tahoma', 'Verdana'];
-Quill.register(Font, true);
+		var Font = Quill.import('formats/font');
+		Font.whitelist = ['Arial', 'Georgia', 'Impact', 'Tahoma', 'Verdana'];
+		Quill.register(Font, true);
 
-// Add custom header formats
-var Header = Quill.import('formats/header');
-Header.whitelist = [false, 1, 2, 3, 4]; // Allow header levels 1 to 4
-Quill.register(Header, true);
+		// Add custom header formats
+		var Header = Quill.import('formats/header');
+		Header.whitelist = [false, 1, 2, 3, 4]; // Allow header levels 1 to 4
+		Quill.register(Header, true);
 
         function toggleHighlight(textContainer, keyword, highlightClass) {
 			var spans = textContainer.querySelectorAll('.' + highlightClass);
@@ -463,37 +459,25 @@ Quill.register(Header, true);
 		}
 		
 		function validateKeywords() {
-    var keywordsInput = document.getElementById('keywords');
-    var keywords = keywordsInput.value.split('\n').map(keyword => keyword.trim()).filter(Boolean);
-    var hasEmptyKeyword = keywords.some(function(keyword) {
-        return keyword === '';
-    });
+			var keywordsInput = document.getElementById('keywords');
+			var keywords = keywordsInput.value.split('\n').map(keyword => keyword.trim()).filter(Boolean);
+			var hasEmptyKeyword = keywords.some(function(keyword) {
+				return keyword === '';
+			});
 
 
 
-    var keywordsWithTrailingSpaces = keywordsInput.value.split('\n').filter(keyword => keyword.endsWith(' '));
+			var keywordsWithTrailingSpaces = keywordsInput.value.split('\n').filter(keyword => keyword.endsWith(' '));
 
-    if (keywordsWithTrailingSpaces.length > 0) {
-        var confirmFix = confirm("Some keywords have trailing spaces. Would you like to fix them?");
-        if (confirmFix) {
-            keywordsInput.value = keywords.join('\n');
-        }
-    }
+			if (keywordsWithTrailingSpaces.length > 0) {
+				var confirmFix = confirm("Some keywords have trailing spaces. Would you like to fix them?");
+				if (confirmFix) {
+					keywordsInput.value = keywords.join('\n');
+				}
+			}
 
-    return true;
-}
-
-function downloadAsWord() {
-    var content = document.querySelector('.ql-editor').innerHTML; // Get the content from Quill
-    var converted = htmlDocx.asBlob(content); // Convert HTML to .docx
-
-    var link = document.createElement('a');
-    link.href = URL.createObjectURL(converted);
-    link.download = 'document.docx';
-    link.click();
-}
-
-document.getElementById('download-button').addEventListener('click', downloadAsWord);
+			return true;
+		}
 
     </script>
 </body>
