@@ -155,6 +155,15 @@
             border: 2px solid #4CAF50;
             z-index: 1;
         }
+		
+		#clear-results-button {
+			background-color: #f44336;
+		}
+		
+		button {
+			background-color: #4CAF50;
+			font-weight: 500;
+		}
 
     </style>
 </head>
@@ -174,7 +183,7 @@
 		<ul>
 			<li>Total Instances = exact keyword match</li>
 			<li>Partial Matches = keywords with slight modifications (eg, KW="casino", partial match="casinos")</li>
-			<li>If a keyword isn't showing up, it's possible there's some space after the last letter.</li>
+			<li>It checks for trailing spaces after the keywords and, if present, it prompts to fix them automatically (not doing so could give wrong results)</li>
 			<li>In Stats, Used KWs is the number of keywords used at least once. % used is the percentage of keywords used at least once compared to the total number.</li>
 			<li>Keyword check isn't case sensitive and works with all alphabets</li>
 		</ul>
@@ -205,9 +214,9 @@
                 <thead>
                     <tr>
                         <th>Keyword</th>
-                        <th>Total Instances</th>
-                        <th>Partial Matches</th>
-                        <th>Density</th>
+                        <th title="Exact KW matches">Total Instances</th>
+                        <th title="KWs with slight differences (eg. 'book' - 'books')">Partial Matches</th>
+                        <th title="Density considers exact and partial matches">Density</th>
                     </tr>
                 </thead>
                 <tbody id="results"></tbody>
@@ -293,7 +302,11 @@
         }
 
         function checkKeywords() {
-            var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+            if (!validateKeywords()) {
+				return;
+			}
+			
+			var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
             var textArea = quill.root.innerHTML;
             var text = textArea;
             var results = document.getElementById('results');
@@ -404,20 +417,45 @@
         });
 		
 		function clearResults() {
-			var results = document.getElementById('results');
-			results.innerHTML = '';
-			
-			// Clear Quill editor
-			quill.root.innerHTML = '';
+			var confirmDelete = confirm("Are you sure you want to delete everything?");
 
-			// Clear keywords textarea
-			document.getElementById('keywords').value = '';
+			if (confirmDelete) {
+				var results = document.getElementById('results');
+				results.innerHTML = '';
 
-			// Also update the stats after clearing results
-			updateStats();
+				// Clear Quill editor
+				quill.root.innerHTML = '';
 
-			// Adjust the height of the results container
-			adjustResultsContainerHeight();
+				// Clear keywords textarea
+				document.getElementById('keywords').value = '';
+
+				// Also update the stats after clearing results
+				updateStats();
+
+				// Adjust the height of the results container
+				adjustResultsContainerHeight();
+			}
+		}
+		
+		function validateKeywords() {
+    var keywordsInput = document.getElementById('keywords');
+    var keywords = keywordsInput.value.split('\n').map(keyword => keyword.trim()).filter(Boolean);
+    var hasEmptyKeyword = keywords.some(function(keyword) {
+        return keyword === '';
+    });
+
+
+
+    var keywordsWithTrailingSpaces = keywordsInput.value.split('\n').filter(keyword => keyword.endsWith(' '));
+
+    if (keywordsWithTrailingSpaces.length > 0) {
+        var confirmFix = confirm("Some keywords have trailing spaces. Would you like to fix them?");
+        if (confirmFix) {
+            keywordsInput.value = keywords.join('\n');
+        }
+    }
+
+    return true;
 }
 
 
