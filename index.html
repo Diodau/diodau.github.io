@@ -206,7 +206,7 @@
                 <p>Used KWs: <span id="usedKeywords">0</span></p>
                 <p>% used: <span id="percentageKeywords">0%</span></p>
                 <p>Unused KWs: <span id="unusedKeywords">0</span></p>
-				<button id="clear-results-button" onclick="clearResults()">Clear Results</button>
+                <button id="clear-results-button" onclick="clearResults()">Clear Results</button>
                 <button class="return-to-top-button" onclick="returnToTop()">Return to top</button>
             </div>
             <div class="quill-container">
@@ -223,7 +223,7 @@
                             <th>Keyword</th>
                             <th title="Exact KW matches">Total Instances</th>
                             <th title="KWs with slight differences (eg. 'book' - 'books')">Partial Matches</th>
-                            <th title="Density only considers exact matches">Density</th>
+                            <th id="densityToggle" onclick="toggleDensityCalculation()">Density (Exact Matches Only)</th>
                         </tr>
                     </thead>
                     <tbody id="results"></tbody>
@@ -238,6 +238,7 @@
         var partialMatchesHighlighted = false;
         var stickyEnabled = false;
         var currentHighlightedKeyword = null;
+        var exactMatchesOnly = true;
 
         var quill = new Quill('#editor', {
             theme: 'snow',
@@ -253,7 +254,7 @@
         });
 
         var Header = Quill.import('formats/header');
-        Header.whitelist = [false, 1, 2, 3, 4]; 
+        Header.whitelist = [false, 1, 2, 3, 4];
         Quill.register(Header, true);
 
         function toggleHighlight(textContainer, keyword, highlightClass) {
@@ -322,37 +323,35 @@
             }
         }
 
-function checkKeywords() {
-    if (!validateKeywords()) {
-        return;
-    }
+        function checkKeywords() {
+            if (!validateKeywords()) {
+                return;
+            }
 
-    var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
-    var text = quill.getText();
-    var results = document.getElementById('results');
-    results.innerHTML = '';
+            var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+            var text = quill.getText();
+            var results = document.getElementById('results');
+            results.innerHTML = '';
 
-    keywords.forEach(function (keyword) {
-        var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-        var totalInstances = (text.match(regex) || []).length;
-        var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
+            keywords.forEach(function (keyword) {
+                var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+                var totalInstances = (text.match(regex) || []).length;
+                var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
 
-        var row = '<tr>';
-        row += '<td class="keyword-cell">' + keyword + '</td>';
-        row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
-        row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
-        var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-        row += '<td>' + ((totalInstances) / wordCount * 100).toFixed(2) + '%</td>';
-        row += '</tr>';
+                var row = '<tr>';
+                row += '<td class="keyword-cell">' + keyword + '</td>';
+                row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
+                row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
+                var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+                row += '<td>' + ((totalInstances) / wordCount * 100).toFixed(2) + '%</td>';
+                row += '</tr>';
 
-        results.innerHTML += row;
-    });
+                results.innerHTML += row;
+            });
 
-    updateStats();
-    adjustResultsContainerHeight();
-}
-
-
+            updateStats();
+            adjustResultsContainerHeight();
+        }
 
         function updateStats() {
             var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
@@ -460,6 +459,19 @@ function checkKeywords() {
             }
 
             return true;
+        }
+
+        function toggleDensityCalculation() {
+            var densityToggle = document.getElementById('densityToggle');
+
+            if (exactMatchesOnly) {
+                densityToggle.textContent = 'Density (Exact + Partial Matches)';
+            } else {
+                densityToggle.textContent = 'Density (Exact Matches Only)';
+            }
+
+            exactMatchesOnly = !exactMatchesOnly;
+            checkKeywords();
         }
 
     </script>
