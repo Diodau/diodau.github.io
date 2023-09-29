@@ -322,35 +322,37 @@
             }
         }
 
-        function checkKeywords() {
-            if (!validateKeywords()) {
-                return;
-            }
+function checkKeywords() {
+    if (!validateKeywords()) {
+        return;
+    }
 
-            var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
-            var textArea = quill.root.innerHTML;
-            var text = textArea;
-            var results = document.getElementById('results');
-            results.innerHTML = '';
+    var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+    var text = quill.getText();
+    var results = document.getElementById('results');
+    results.innerHTML = '';
 
-            keywords.forEach(function (keyword) {
-                var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-                var totalInstances = (text.match(regex) || []).length;
-                var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
+    keywords.forEach(function (keyword) {
+        var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+        var totalInstances = (text.match(regex) || []).length;
+        var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
 
-                var row = '<tr>';
-                row += '<td class="keyword-cell">' + keyword + '</td>';
-                row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
-                row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
-                row += '<td>' + ((totalInstances + partialMatches) / text.split(/\s+/).length * 100).toFixed(2) + '%</td>';
-                row += '</tr>';
+        var row = '<tr>';
+        row += '<td class="keyword-cell">' + keyword + '</td>';
+        row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
+        row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
+        var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+        row += '<td>' + ((totalInstances) / wordCount * 100).toFixed(2) + '%</td>';
+        row += '</tr>';
 
-                results.innerHTML += row;
-            });
+        results.innerHTML += row;
+    });
 
-            updateStats();
-            adjustResultsContainerHeight();
-        }
+    updateStats();
+    adjustResultsContainerHeight();
+}
+
+
 
         function updateStats() {
             var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
