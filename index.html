@@ -224,7 +224,7 @@
                             <th>Keyword</th>
                             <th title="Exact KW matches">Exact Matches</th>
                             <th title="KWs with slight differences (eg. 'book' - 'books')">Partial Matches</th>
-                            <th id="densityToggle" onclick="toggleDensityCalculation()">Density (Exact Matches Only)</th>
+                            <th id="densityToggle" onclick="toggleDensityCalculation()">Density (Exact)</th>
                         </tr>
                     </thead>
                     <tbody id="results"></tbody>
@@ -476,6 +476,8 @@
             exactMatchesOnly = !exactMatchesOnly;
             checkKeywords();
         }
+		
+		
 
     </script>
 </body>
