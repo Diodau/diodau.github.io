@@ -188,7 +188,7 @@
             </ol>
             <h2>Note:</h2>
             <ul>
-                <li>Total Instances = exact keyword match</li>
+                <li>Exact Matches = exact keyword match</li>
                 <li>Partial Matches = keywords with slight modifications (eg, KW="casino", partial match="casinos")</li>
                 <li>It checks for trailing spaces after the keywords and, if present, it prompts to fix them automatically (not doing so could give wrong results)</li>
                 <li>In Stats, Used KWs is the number of keywords used at least once. % used is the percentage of keywords used at least once compared to the total number.</li>
@@ -221,7 +221,7 @@
                     <thead>
                         <tr>
                             <th>Keyword</th>
-                            <th title="Exact KW matches">Total Instances</th>
+                            <th title="Exact KW matches">Exact Matches</th>
                             <th title="KWs with slight differences (eg. 'book' - 'books')">Partial Matches</th>
                             <th id="densityToggle" onclick="toggleDensityCalculation()">Density (Exact Matches Only)</th>
                         </tr>
@@ -324,34 +324,36 @@
         }
 
         function checkKeywords() {
-            if (!validateKeywords()) {
-                return;
-            }
+    if (!validateKeywords()) {
+        return;
+    }
 
-            var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
-            var text = quill.getText();
-            var results = document.getElementById('results');
-            results.innerHTML = '';
+    var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+    var text = quill.getText();
+    var results = document.getElementById('results');
+    results.innerHTML = '';
 
-            keywords.forEach(function (keyword) {
-                var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-                var totalInstances = (text.match(regex) || []).length;
-                var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
+    keywords.forEach(function (keyword) {
+        var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+        var totalInstances = (text.match(regex) || []).length;
+        var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
 
-                var row = '<tr>';
-                row += '<td class="keyword-cell">' + keyword + '</td>';
-                row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
-                row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
-                var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-                row += '<td>' + ((totalInstances) / wordCount * 100).toFixed(2) + '%</td>';
-                row += '</tr>';
+        var row = '<tr>';
+        row += '<td class="keyword-cell">' + keyword + '</td>';
+        row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
+        row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
+        var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+        var density = exactMatchesOnly ? (totalInstances / wordCount * 100).toFixed(2) : ((totalInstances + partialMatches) / wordCount * 100).toFixed(2);
+        row += '<td>' + density + '%</td>';
+        row += '</tr>';
 
-                results.innerHTML += row;
-            });
+        results.innerHTML += row;
+    });
 
-            updateStats();
-            adjustResultsContainerHeight();
-        }
+    updateStats();
+    adjustResultsContainerHeight();
+}
+
 
         function updateStats() {
             var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
@@ -465,9 +467,9 @@
             var densityToggle = document.getElementById('densityToggle');
 
             if (exactMatchesOnly) {
-                densityToggle.textContent = 'Density (Exact + Partial Matches)';
+                densityToggle.textContent = 'Density (Exact + Partial)';
             } else {
-                densityToggle.textContent = 'Density (Exact Matches Only)';
+                densityToggle.textContent = 'Density (Exact)';
             }
 
             exactMatchesOnly = !exactMatchesOnly;
