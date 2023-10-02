@@ -278,7 +278,7 @@
             textContainer.innerHTML = highlightedText;
         }
 
-        function toggleInstancesHighlight(keyword) {
+        		function toggleInstancesHighlight(keyword) {
             var transcribedDiv = quill.root;
 
             if (currentHighlightedKeyword === keyword) {
@@ -298,6 +298,7 @@
             }
         }
 
+        // Function to highlight partials using MutationObserver
         function togglePartialsHighlight(keyword) {
             var transcribedDiv = quill.root;
 
