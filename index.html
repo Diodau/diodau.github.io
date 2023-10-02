@@ -207,6 +207,7 @@
                 <p>Used KWs: <span id="usedKeywords">0</span></p>
                 <p>% used: <span id="percentageKeywords">0%</span></p>
                 <p>Unused KWs: <span id="unusedKeywords">0</span></p>
+				<p>Average distance: <span id="averageDistance">N/A</span></p>
                 <button id="clear-results-button" onclick="clearResults()">Clear Results</button>
                 <button class="return-to-top-button" onclick="returnToTop()">Return to top</button>
             </div>
@@ -325,35 +326,38 @@
         }
 
         function checkKeywords() {
-    if (!validateKeywords()) {
-        return;
-    }
+			if (!validateKeywords()) {
+				return;
+			}
 
-    var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
-    var text = quill.getText();
-    var results = document.getElementById('results');
-    results.innerHTML = '';
+			var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+			var text = quill.getText();
+			var results = document.getElementById('results');
+			results.innerHTML = '';
+			
+			
 
-    keywords.forEach(function (keyword) {
-        var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-        var totalInstances = (text.match(regex) || []).length;
-        var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
+			keywords.forEach(function (keyword) {
+				var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+				var totalInstances = (text.match(regex) || []).length;
+				var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
 
-        var row = '<tr>';
-        row += '<td class="keyword-cell">' + keyword + '</td>';
-        row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
-        row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
-        var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-        var density = exactMatchesOnly ? (totalInstances / wordCount * 100).toFixed(2) : ((totalInstances + partialMatches) / wordCount * 100).toFixed(2);
-        row += '<td>' + density + '%</td>';
-        row += '</tr>';
+				var row = '<tr>';
+				row += '<td class="keyword-cell">' + keyword + '</td>';
+				row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
+				row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
+				var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+				var density = exactMatchesOnly ? (totalInstances / wordCount * 100).toFixed(2) : ((totalInstances + partialMatches) / wordCount * 100).toFixed(2);
+				row += '<td>' + density + '%</td>';
+				row += '</tr>';
 
-        results.innerHTML += row;
-    });
+				results.innerHTML += row;
+			});
 
-    updateStats();
-    adjustResultsContainerHeight();
-}
+			updateStats();
+			adjustResultsContainerHeight();
+			calculateAverageDistance();
+		}
 
 
         function updateStats() {
@@ -477,7 +481,45 @@
             checkKeywords();
         }
 		
-		
+		function calculateAverageDistance() {
+			var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+
+			if (keywords.length < 2) {
+				document.getElementById('averageDistance').textContent = 'N/A';
+				return;
+			}
+
+			var matches = [];
+			var text = quill.getText();
+
+			keywords.forEach(function (keyword) {
+				var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+				var keywordMatches = [...text.matchAll(regex)];
+				matches = matches.concat(keywordMatches);
+			});
+
+			matches.sort(function (a, b) {
+				return a.index - b.index;
+			});
+
+			var distances = [];
+
+			for (var i = 1; i < matches.length; i++) {
+				var wordsBetween = text.substring(matches[i - 1].index, matches[i].index).trim().split(/\s+/).length - 1;
+				distances.push(wordsBetween);
+			}
+
+			if (distances.length === 0) {
+				document.getElementById('averageDistance').textContent = 'N/A';
+				return;
+			}
+
+			var sum = distances.reduce((a, b) => a + b, 0);
+			var averageDistance = (sum / (distances.length)).toFixed(2);
+
+			document.getElementById('averageDistance').textContent = averageDistance + ' words';
+		}
+
 
     </script>
 </body>
