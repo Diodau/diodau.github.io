@@ -260,7 +260,8 @@
         Quill.register(Header, true);
 
         function toggleHighlight(textContainer, keyword, highlightClass) {
-            var spans = textContainer.querySelectorAll('.' + highlightClass);
+            console.log()
+			var spans = textContainer.querySelectorAll('.' + highlightClass);
             spans.forEach(function (span) {
                 span.outerHTML = span.innerHTML;
             });
@@ -278,8 +279,9 @@
             textContainer.innerHTML = highlightedText;
         }
 
-        		function toggleInstancesHighlight(keyword) {
-            var transcribedDiv = quill.root;
+        function toggleInstancesHighlight(keyword) {
+            console.log()
+			var transcribedDiv = quill.root;
 
             if (currentHighlightedKeyword === keyword) {
                 var spans = transcribedDiv.querySelectorAll('.highlight-green');
@@ -298,9 +300,9 @@
             }
         }
 
-        // Function to highlight partials using MutationObserver
         function togglePartialsHighlight(keyword) {
-            var transcribedDiv = quill.root;
+            console.log()
+			var transcribedDiv = quill.root;
 
             if (currentHighlightedKeyword === keyword) {
                 var spans = transcribedDiv.querySelectorAll('.highlight-yellow');
@@ -336,8 +338,6 @@
 			var results = document.getElementById('results');
 			results.innerHTML = '';
 			
-			
-
 			keywords.forEach(function (keyword) {
 				var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
 				var totalInstances = (text.match(regex) || []).length;
