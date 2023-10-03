@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-	<script src=”https://code.jquery.com/jquery-3.6.0.min.js”></script>
     <title>Keyword Checker</title>
     <style>
         body {
@@ -261,8 +260,7 @@
         Quill.register(Header, true);
 
         function toggleHighlight(textContainer, keyword, highlightClass) {
-            console.log()
-			var spans = textContainer.querySelectorAll('.' + highlightClass);
+            var spans = textContainer.querySelectorAll('.' + highlightClass);
             spans.forEach(function (span) {
                 span.outerHTML = span.innerHTML;
             });
@@ -281,8 +279,7 @@
         }
 
         function toggleInstancesHighlight(keyword) {
-            console.log()
-			var transcribedDiv = quill.root;
+            var transcribedDiv = quill.root;
 
             if (currentHighlightedKeyword === keyword) {
                 var spans = transcribedDiv.querySelectorAll('.highlight-green');
@@ -302,8 +299,7 @@
         }
 
         function togglePartialsHighlight(keyword) {
-            console.log()
-			var transcribedDiv = quill.root;
+            var transcribedDiv = quill.root;
 
             if (currentHighlightedKeyword === keyword) {
                 var spans = transcribedDiv.querySelectorAll('.highlight-yellow');
@@ -339,6 +335,8 @@
 			var results = document.getElementById('results');
 			results.innerHTML = '';
 			
+			
+
 			keywords.forEach(function (keyword) {
 				var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
 				var totalInstances = (text.match(regex) || []).length;
