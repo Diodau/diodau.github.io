@@ -241,293 +241,288 @@
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script>
-        var totalInstancesHighlighted = false;
-        var partialMatchesHighlighted = false;
-        var stickyEnabled = false;
-        var currentHighlightedKeyword = null;
-        var exactMatchesOnly = true;
+<script>
+    var totalInstancesHighlighted = false;
+    var partialMatchesHighlighted = false;
+    var stickyEnabled = false;
+    var currentHighlightedKeyword = null;
+    var exactMatchesOnly = true;
 
-        var quill = new Quill('#editor', {
-            theme: 'snow',
-            placeholder: 'Insert your text here...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['link', 'image', 'video'],
-                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                ]
-            }
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Insert your text here...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                ['link', 'image', 'video'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ]
+        }
+    });
+
+    var Header = Quill.import('formats/header');
+    Header.whitelist = [false, 1, 2, 3, 4];
+    Quill.register(Header, true);
+
+    function getPlainTextFromQuill() {
+        return quill.root.innerText || quill.root.textContent;
+    }
+
+    function toggleHighlight(textContainer, keyword, highlightClass) {
+        var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+        var text = textContainer.innerHTML;
+        var highlightedText = text.replace(regex, function (match) {
+            return '<span class="' + highlightClass + '">' + match + '</span>';
         });
 
-        var Header = Quill.import('formats/header');
-        Header.whitelist = [false, 1, 2, 3, 4];
-        Quill.register(Header, true);
+        if (text === highlightedText) {
+            highlightedText = text.replace(new RegExp('<span class="' + highlightClass + '">|<\/span>', 'gi'), '');
+        }
 
-        function toggleHighlight(textContainer, keyword, highlightClass) {
-            var spans = textContainer.querySelectorAll('.' + highlightClass);
+        textContainer.innerHTML = highlightedText;
+    }
+
+    function toggleInstancesHighlight(keyword) {
+        var transcribedDiv = quill.root;
+
+        if (currentHighlightedKeyword === keyword) {
+            var spans = transcribedDiv.querySelectorAll('.highlight-green');
             spans.forEach(function (span) {
                 span.outerHTML = span.innerHTML;
             });
+            currentHighlightedKeyword = null;
+        } else {
+            if (currentHighlightedKeyword) {
+                var prevKeyword = currentHighlightedKeyword;
+                toggleInstancesHighlight(prevKeyword);
+            }
 
-            var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-            var text = textContainer.innerHTML;
+            toggleHighlight(transcribedDiv, keyword, 'highlight-green');
+            currentHighlightedKeyword = keyword;
+        }
+    }
+
+    function togglePartialsHighlight(keyword) {
+        var transcribedDiv = quill.root;
+
+        if (currentHighlightedKeyword === keyword) {
+            var spans = transcribedDiv.querySelectorAll('.highlight-yellow');
+            spans.forEach(function (span) {
+                span.outerHTML = span.innerHTML;
+            });
+            currentHighlightedKeyword = null;
+        } else {
+            if (currentHighlightedKeyword) {
+                var prevKeyword = currentHighlightedKeyword;
+                togglePartialsHighlight(prevKeyword);
+            }
+
+            var escapedKeyword = escapeRegExp(keyword);
+            var regex = new RegExp(`(?!\\b${escapedKeyword}\\b)[\\w\\u0600-\\u06FF]*${escapedKeyword}[\\w\\u0600-\\u06FF]*\\b`, 'gi');
+            var text = transcribedDiv.innerHTML;
             var highlightedText = text.replace(regex, function (match) {
-                return '<span class="' + highlightClass + '">' + match + '</span>';
+                return '<span class="highlight-yellow">' + match + '</span>';
             });
 
-            if (text === highlightedText) {
-                highlightedText = text.replace(new RegExp('<span class="' + highlightClass + '">|<\/span>', 'gi'), '');
-            }
+            transcribedDiv.innerHTML = highlightedText;
+            currentHighlightedKeyword = keyword;
+        }
+    }
 
-            textContainer.innerHTML = highlightedText;
+    function checkKeywords() {
+        if (!validateKeywords()) {
+            return;
         }
 
-        function toggleInstancesHighlight(keyword) {
-            var transcribedDiv = quill.root;
+        var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+        var text = getPlainTextFromQuill();
+        var results = document.getElementById('results');
+        results.innerHTML = '';
 
-            if (currentHighlightedKeyword === keyword) {
-                var spans = transcribedDiv.querySelectorAll('.highlight-green');
-                spans.forEach(function (span) {
-                    span.outerHTML = span.innerHTML;
-                });
-                currentHighlightedKeyword = null;
-            } else {
-                if (currentHighlightedKeyword) {
-                    var prevKeyword = currentHighlightedKeyword;
-                    toggleInstancesHighlight(prevKeyword);
-                }
+        keywords.forEach(function (keyword) {
+            var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+            var totalInstances = (text.match(regex) || []).length;
+            var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
 
-                toggleHighlight(transcribedDiv, keyword, 'highlight-green');
-                currentHighlightedKeyword = keyword;
-            }
-        }
+            var row = '<tr>';
+            row += '<td class="keyword-cell">' + keyword + '</td>';
+            row += '<td class="total-instances-cell hover-pointer" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
+            row += '<td class="partial-matches-cell hover-pointer" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
+            var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+            var density = exactMatchesOnly ? (totalInstances / wordCount * 100).toFixed(2) : ((totalInstances + partialMatches) / wordCount * 100).toFixed(2);
+            row += '<td>' + density + '%</td>';
+            row += '</tr>';
 
-        function togglePartialsHighlight(keyword) {
-            var transcribedDiv = quill.root;
+            results.innerHTML += row;
+        });
 
-            if (currentHighlightedKeyword === keyword) {
-                var spans = transcribedDiv.querySelectorAll('.highlight-yellow');
-                spans.forEach(function (span) {
-                    span.outerHTML = span.innerHTML;
-                });
-                currentHighlightedKeyword = null;
-            } else {
-                if (currentHighlightedKeyword) {
-                    var prevKeyword = currentHighlightedKeyword;
-                    togglePartialsHighlight(prevKeyword);
-                }
+        updateStats();
+        adjustResultsContainerHeight();
+        calculateAverageDistance();
+    }
 
-                var escapedKeyword = escapeRegExp(keyword);
-                var regex = new RegExp(`(?!\\b${escapedKeyword}\\b)[\\w\\u0600-\\u06FF]*${escapedKeyword}[\\w\\u0600-\\u06FF]*\\b`, 'gi');
-                var text = transcribedDiv.innerHTML;
-                var highlightedText = text.replace(regex, function (match) {
-                    return '<span class="highlight-yellow">' + match + '</span>';
-                });
+    function updateStats() {
+        var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
+        var usedKeywords = 0;
 
-                transcribedDiv.innerHTML = highlightedText;
-                currentHighlightedKeyword = keyword;
-            }
-        }
-
-        function checkKeywords() {
-			if (!validateKeywords()) {
-				return;
-			}
-
-			var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
-			var text = quill.getText();
-			var results = document.getElementById('results');
-			results.innerHTML = '';
-			
-			
-
-			keywords.forEach(function (keyword) {
-				var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-				var totalInstances = (text.match(regex) || []).length;
-				var partialMatches = (text.match(new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '\\w*', 'gi')) || []).length - totalInstances;
-
-				var row = '<tr>';
-				row += '<td class="keyword-cell">' + keyword + '</td>';
-				row += '<td class="total-instances-cell hover-pointer" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
-				row += '<td class="partial-matches-cell hover-pointer" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
-				var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-				var density = exactMatchesOnly ? (totalInstances / wordCount * 100).toFixed(2) : ((totalInstances + partialMatches) / wordCount * 100).toFixed(2);
-				row += '<td>' + density + '%</td>';
-				row += '</tr>';
-
-				results.innerHTML += row;
-			});
-
-			updateStats();
-			adjustResultsContainerHeight();
-			calculateAverageDistance();
-		}
-
-
-        function updateStats() {
-            var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
-            var usedKeywords = 0;
-
-            keywords.forEach(function (keyword) {
-                var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-                if (quill.root.innerHTML.match(regex)) {
-                    usedKeywords++;
-                }
-            });
-
-            var totalKeywords = keywords.length;
-            var percentageKeywords = (usedKeywords / totalKeywords * 100).toFixed(2) + '%';
-            var unusedKeywords = totalKeywords - usedKeywords;
-
-            document.getElementById('totalKeywords').textContent = totalKeywords;
-            document.getElementById('usedKeywords').textContent = usedKeywords;
-            document.getElementById('percentageKeywords').textContent = percentageKeywords;
-            document.getElementById('unusedKeywords').textContent = unusedKeywords;
-
-            adjustResultsContainerHeight();
-        }
-
-        function adjustResultsContainerHeight() {
-            var resultsContainer = document.getElementById('resultsContainer');
-            var resultsTable = document.getElementById('resultsTable');
-
-            resultsContainer.style.height = resultsTable.clientHeight + 'px';
-        }
-
-        function escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        function toggleSticky() {
-            var resultsContainer = document.querySelector('.results-container');
-            var stickyButton = document.getElementById('sticky-button');
-
-            if (stickyEnabled) {
-                resultsContainer.classList.remove('sticky');
-                stickyButton.textContent = 'Stick List';
-            } else {
-                resultsContainer.classList.add('sticky');
-                stickyButton.textContent = 'Unstick List';
-            }
-
-            stickyEnabled = !stickyEnabled;
-        }
-
-        function toggleInstructions() {
-            var instructions = document.getElementById('instructions');
-            instructions.classList.toggle('show');
-
-            var howToUseButton = document.querySelector('.how-to-use-button');
-            howToUseButton.textContent = instructions.classList.contains('show') ? 'Hide Instructions' : 'How to use';
-        }
-
-        function returnToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        window.addEventListener('scroll', function () {
-            var button = document.querySelector('.return-to-top-button');
-            var keywordContainer = document.querySelector('.keyword-container');
-            var keywordContainerRect = keywordContainer.getBoundingClientRect();
-
-            if (window.scrollY > keywordContainerRect.bottom) {
-                button.style.visibility = 'visible';
-            } else {
-                button.style.visibility = 'hidden';
+        keywords.forEach(function (keyword) {
+            var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+            if (quill.root.innerHTML.match(regex)) {
+                usedKeywords++;
             }
         });
 
-        function clearResults() {
-            var confirmDelete = confirm("Are you sure you want to delete everything?");
+        var totalKeywords = keywords.length;
+        var percentageKeywords = (usedKeywords / totalKeywords * 100).toFixed(2) + '%';
+        var unusedKeywords = totalKeywords - usedKeywords;
 
-            if (confirmDelete) {
-                var results = document.getElementById('results');
-                results.innerHTML = '';
-                quill.root.innerHTML = '';
-                document.getElementById('keywords').value = '';
-                updateStats();
-                adjustResultsContainerHeight();
+        document.getElementById('totalKeywords').textContent = totalKeywords;
+        document.getElementById('usedKeywords').textContent = usedKeywords;
+        document.getElementById('percentageKeywords').textContent = percentageKeywords;
+        document.getElementById('unusedKeywords').textContent = unusedKeywords;
+
+        adjustResultsContainerHeight();
+    }
+
+    function adjustResultsContainerHeight() {
+        var resultsContainer = document.getElementById('resultsContainer');
+        var resultsTable = document.getElementById('resultsTable');
+
+        resultsContainer.style.height = resultsTable.clientHeight + 'px';
+    }
+
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function toggleSticky() {
+        var resultsContainer = document.querySelector('.results-container');
+        var stickyButton = document.getElementById('sticky-button');
+
+        if (stickyEnabled) {
+            resultsContainer.classList.remove('sticky');
+            stickyButton.textContent = 'Stick List';
+        } else {
+            resultsContainer.classList.add('sticky');
+            stickyButton.textContent = 'Unstick List';
+        }
+
+        stickyEnabled = !stickyEnabled;
+    }
+
+    function toggleInstructions() {
+        var instructions = document.getElementById('instructions');
+        instructions.classList.toggle('show');
+
+        var howToUseButton = document.querySelector('.how-to-use-button');
+        howToUseButton.textContent = instructions.classList.contains('show') ? 'Hide Instructions' : 'How to use';
+    }
+
+    function returnToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    window.addEventListener('scroll', function () {
+        var button = document.querySelector('.return-to-top-button');
+        var keywordContainer = document.querySelector('.keyword-container');
+        var keywordContainerRect = keywordContainer.getBoundingClientRect();
+
+        if (window.scrollY > keywordContainerRect.bottom) {
+            button.style.visibility = 'visible';
+        } else {
+            button.style.visibility = 'hidden';
+        }
+    });
+
+    function clearResults() {
+        var confirmDelete = confirm("Are you sure you want to delete everything?");
+
+        if (confirmDelete) {
+            var results = document.getElementById('results');
+            results.innerHTML = '';
+            quill.root.innerHTML = '';
+            document.getElementById('keywords').value = '';
+            updateStats();
+            adjustResultsContainerHeight();
+        }
+    }
+
+    function validateKeywords() {
+        var keywordsInput = document.getElementById('keywords');
+        var keywords = keywordsInput.value.split('\n').map(keyword => keyword.trim()).filter(Boolean);
+        var hasEmptyKeyword = keywords.some(function (keyword) {
+            return keyword === '';
+        });
+
+        var keywordsWithTrailingSpaces = keywordsInput.value.split('\n').filter(keyword => keyword.endsWith(' '));
+
+        if (keywordsWithTrailingSpaces.length > 0) {
+            var confirmFix = confirm("Some keywords have trailing spaces. Would you like to fix them?");
+            if (confirmFix) {
+                keywordsInput.value = keywords.join('\n');
             }
         }
 
-        function validateKeywords() {
-            var keywordsInput = document.getElementById('keywords');
-            var keywords = keywordsInput.value.split('\n').map(keyword => keyword.trim()).filter(Boolean);
-            var hasEmptyKeyword = keywords.some(function (keyword) {
-                return keyword === '';
-            });
+        return true;
+    }
 
-            var keywordsWithTrailingSpaces = keywordsInput.value.split('\n').filter(keyword => keyword.endsWith(' '));
+    function toggleDensityCalculation() {
+        var densityToggle = document.getElementById('densityToggle');
 
-            if (keywordsWithTrailingSpaces.length > 0) {
-                var confirmFix = confirm("Some keywords have trailing spaces. Would you like to fix them?");
-                if (confirmFix) {
-                    keywordsInput.value = keywords.join('\n');
-                }
-            }
-
-            return true;
+        if (exactMatchesOnly) {
+            densityToggle.textContent = 'Density (Exact + Partial)';
+        } else {
+            densityToggle.textContent = 'Density (Exact)';
         }
 
-        function toggleDensityCalculation() {
-            var densityToggle = document.getElementById('densityToggle');
+        exactMatchesOnly = !exactMatchesOnly;
+        checkKeywords();
+    }
 
-            if (exactMatchesOnly) {
-                densityToggle.textContent = 'Density (Exact + Partial)';
-            } else {
-                densityToggle.textContent = 'Density (Exact)';
-            }
+    function calculateAverageDistance() {
+        var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
 
-            exactMatchesOnly = !exactMatchesOnly;
-            checkKeywords();
+        if (keywords.length < 2) {
+            document.getElementById('averageDistance').textContent = 'N/A';
+            return;
         }
-		
-		function calculateAverageDistance() {
-			var keywords = document.getElementById('keywords').value.split('\n').filter(Boolean);
 
-			if (keywords.length < 2) {
-				document.getElementById('averageDistance').textContent = 'N/A';
-				return;
-			}
+        var matches = [];
+        var text = getPlainTextFromQuill();
 
-			var matches = [];
-			var text = quill.getText();
+        keywords.forEach(function (keyword) {
+            var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
+            var keywordMatches = [...text.matchAll(regex)];
+            matches = matches.concat(keywordMatches);
+        });
 
-			keywords.forEach(function (keyword) {
-				var regex = new RegExp('(?<!\\w)' + escapeRegExp(keyword) + '(?!\\w)', 'gi');
-				var keywordMatches = [...text.matchAll(regex)];
-				matches = matches.concat(keywordMatches);
-			});
+        matches.sort(function (a, b) {
+            return a.index - b.index;
+        });
 
-			matches.sort(function (a, b) {
-				return a.index - b.index;
-			});
+        var distances = [];
 
-			var distances = [];
+        for (var i = 1; i < matches.length; i++) {
+            var wordsBetween = text.substring(matches[i - 1].index, matches[i].index).trim().split(/\s+/).length - 1;
+            distances.push(wordsBetween);
+        }
 
-			for (var i = 1; i < matches.length; i++) {
-				var wordsBetween = text.substring(matches[i - 1].index, matches[i].index).trim().split(/\s+/).length - 1;
-				distances.push(wordsBetween);
-			}
+        if (distances.length === 0) {
+            document.getElementById('averageDistance').textContent = 'N/A';
+            return;
+        }
 
-			if (distances.length === 0) {
-				document.getElementById('averageDistance').textContent = 'N/A';
-				return;
-			}
+        var sum = distances.reduce((a, b) => a + b, 0);
+        var averageDistance = (sum / (distances.length)).toFixed(2);
 
-			var sum = distances.reduce((a, b) => a + b, 0);
-			var averageDistance = (sum / (distances.length)).toFixed(2);
+        document.getElementById('averageDistance').textContent = averageDistance + ' words';
+    }
+</script>
 
-			document.getElementById('averageDistance').textContent = averageDistance + ' words';
-		}
-
-
-    </script>
 </body>
 
 </html>
