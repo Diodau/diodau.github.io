@@ -101,8 +101,14 @@
             border: 1px solid #ccc;
             padding: 8px;
             text-align: center;
-            cursor: pointer;
+            cursor: text;
         }
+		
+		td.total-instances-cell:hover,
+		td.partial-matches-cell:hover,
+		th.density-toggle:hover {
+			cursor: pointer;
+		}
 
         th:hover,
         td:hover {
@@ -225,7 +231,7 @@
                             <th>Keyword</th>
                             <th title="Exact KW matches">Exact Matches</th>
                             <th title="KWs with slight differences (eg. 'book' - 'books')">Partial Matches</th>
-                            <th id="densityToggle" onclick="toggleDensityCalculation()">Density (Exact)</th>
+                            <th id="densityToggle" class="density-toggle" onclick="toggleDensityCalculation()">Density (Exact)</th>
                         </tr>
                     </thead>
                     <tbody id="results"></tbody>
@@ -344,8 +350,8 @@
 
 				var row = '<tr>';
 				row += '<td class="keyword-cell">' + keyword + '</td>';
-				row += '<td class="total-instances-cell" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
-				row += '<td class="partial-matches-cell" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
+				row += '<td class="total-instances-cell hover-pointer" onclick="toggleInstancesHighlight(\'' + keyword + '\')">' + totalInstances + '</td>';
+				row += '<td class="partial-matches-cell hover-pointer" onclick="togglePartialsHighlight(\'' + keyword + '\')">' + partialMatches + '</td>';
 				var wordCount = text.trim().split(/\s+/).filter(Boolean).length;
 				var density = exactMatchesOnly ? (totalInstances / wordCount * 100).toFixed(2) : ((totalInstances + partialMatches) / wordCount * 100).toFixed(2);
 				row += '<td>' + density + '%</td>';
