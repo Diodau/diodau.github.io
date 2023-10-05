@@ -360,6 +360,7 @@
         updateStats();
         adjustResultsContainerHeight();
         calculateAverageDistance();
+		highlightText();
     }
 
     function updateStats() {
@@ -521,6 +522,12 @@
 
         document.getElementById('averageDistance').textContent = averageDistance + ' words';
     }
+	
+	function highlightText() {
+    var editorContent = document.querySelector('.ql-editor');
+    editorContent.style.backgroundColor = 'rgb(255, 255, 254)';
+}
+
 </script>
 
 </body>
